@@ -1,0 +1,6 @@
+{
+  "name": "Scroll Down",
+  "description": "A luxury dark-and-gold social media Android application featuring Home Feed, Stories, Reels, Direct Messaging, Search & Explore, Golden Verification, and an Admin Dashboard backed by Firebase.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

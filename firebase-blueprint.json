@@ -1,0 +1,398 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Public social profile for SCROLL DOWN users (strictly isolated from PII).",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Firebase Auth UID matching document ID." },
+        "username": { "type": "string", "description": "Lowercase unique handle (3-24 chars)." },
+        "displayName": { "type": "string", "description": "Full display name." },
+        "bio": { "type": "string", "description": "Profile bio." },
+        "avatarUrl": { "type": "string", "description": "Profile avatar URI or compressed data URI." },
+        "role": { "type": "string", "enum": ["USER", "SUPER_ADMIN"] },
+        "isGoldenVerified": { "type": "boolean" },
+        "isPrivate": { "type": "boolean" },
+        "isBanned": { "type": "boolean" },
+        "demoFollowersDisplay": { "type": "integer", "description": "300000 demo display value for @utkarshrai only." },
+        "followersCount": { "type": "integer" },
+        "followingCount": { "type": "integer" },
+        "postsCount": { "type": "integer" },
+        "lastActiveAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "username", "displayName", "bio", "role", "isGoldenVerified", "isPrivate", "isBanned", "demoFollowersDisplay", "followersCount", "followingCount", "postsCount", "lastActiveAt", "createdAt", "updatedAt"]
+    },
+    "UserPrivateInfo": {
+      "title": "UserPrivateInfo",
+      "description": "PII and private security preferences isolated under users/{userId}/private/info.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "email": { "type": "string" },
+        "dateOfBirth": { "type": "string" },
+        "twoFactorEnabled": { "type": "boolean" },
+        "backupCodes": { "type": "array" },
+        "securityPinHash": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "email", "dateOfBirth", "twoFactorEnabled", "backupCodes", "createdAt", "updatedAt"]
+    },
+    "LoginActivity": {
+      "title": "LoginActivity",
+      "description": "Device sign-in log entry under users/{userId}/login_activity/{activityId}.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "deviceModel": { "type": "string" },
+        "authMethod": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "deviceModel", "authMethod", "createdAt"]
+    },
+    "SavedPostRef": {
+      "title": "SavedPostRef",
+      "description": "Private bookmarked or liked post reference.",
+      "type": "object",
+      "properties": {
+        "postId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["postId", "createdAt"]
+    },
+    "CloseFriendRef": {
+      "title": "CloseFriendRef",
+      "description": "Owner-curated Close Friends list entry.",
+      "type": "object",
+      "properties": {
+        "targetId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["targetId", "createdAt"]
+    },
+    "WatchHistoryItem": {
+      "title": "WatchHistoryItem",
+      "description": "Owner's Reels and Video watch history record.",
+      "type": "object",
+      "properties": {
+        "postId": { "type": "string" },
+        "mediaType": { "type": "string", "enum": ["VIDEO", "REEL"] },
+        "watchedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["postId", "mediaType", "watchedAt"]
+    },
+    "UserBlock": {
+      "title": "UserBlock",
+      "description": "Blocked or restricted account record.",
+      "type": "object",
+      "properties": {
+        "targetId": { "type": "string" },
+        "type": { "type": "string", "enum": ["BLOCKED", "RESTRICTED"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["targetId", "type", "createdAt"]
+    },
+    "NotificationItem": {
+      "title": "NotificationItem",
+      "description": "Real-time notification delivered to users/{userId}/notifications/{notificationId}.",
+      "type": "object",
+      "properties": {
+        "recipientId": { "type": "string" },
+        "actorId": { "type": "string" },
+        "type": { "type": "string" },
+        "referenceId": { "type": "string" },
+        "message": { "type": "string" },
+        "isRead": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["recipientId", "actorId", "type", "referenceId", "message", "isRead", "createdAt"]
+    },
+    "UsernameReservation": {
+      "title": "UsernameReservation",
+      "description": "Unique handle reservation mapped from lowercase username to UID.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "createdAt"]
+    },
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Trusted Super Admin registry.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["SUPER_ADMIN"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "email", "role", "createdAt"]
+    },
+    "FollowRelation": {
+      "title": "FollowRelation",
+      "description": "Follow edge between followerId and followingId.",
+      "type": "object",
+      "properties": {
+        "followerId": { "type": "string" },
+        "followingId": { "type": "string" },
+        "status": { "type": "string", "enum": ["ACCEPTED", "PENDING"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["followerId", "followingId", "status", "createdAt", "updatedAt"]
+    },
+    "PostItem": {
+      "title": "PostItem",
+      "description": "Social photo, carousel, video, reel, or scheduled post.",
+      "type": "object",
+      "properties": {
+        "authorId": { "type": "string" },
+        "caption": { "type": "string" },
+        "mediaUrls": { "type": "array" },
+        "mediaType": { "type": "string", "enum": ["PHOTO", "CAROUSEL", "VIDEO", "REEL"] },
+        "hashtags": { "type": "array" },
+        "taggedUsernames": { "type": "array" },
+        "musicTitle": { "type": "string" },
+        "likesCount": { "type": "integer" },
+        "commentsCount": { "type": "integer" },
+        "viewsCount": { "type": "integer" },
+        "isReel": { "type": "boolean" },
+        "isArchived": { "type": "boolean" },
+        "scheduledAtMs": { "type": "integer" },
+        "audience": { "type": "string", "enum": ["ALL", "CLOSE_FRIENDS"] },
+        "allowedViewerIds": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["authorId", "caption", "mediaUrls", "mediaType", "hashtags", "taggedUsernames", "musicTitle", "likesCount", "commentsCount", "viewsCount", "isReel", "isArchived", "createdAt", "updatedAt"]
+    },
+    "PostLike": {
+      "title": "PostLike",
+      "description": "Per-user like document under posts/{postId}/likes/{userId}.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "createdAt"]
+    },
+    "PostComment": {
+      "title": "PostComment",
+      "description": "Comment or threaded reply under posts/{postId}/comments/{commentId}.",
+      "type": "object",
+      "properties": {
+        "postId": { "type": "string" },
+        "authorId": { "type": "string" },
+        "parentCommentId": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["postId", "authorId", "text", "createdAt"]
+    },
+    "StoryItem": {
+      "title": "StoryItem",
+      "description": "24-hour story or highlight.",
+      "type": "object",
+      "properties": {
+        "authorId": { "type": "string" },
+        "mediaUrl": { "type": "string" },
+        "mediaType": { "type": "string", "enum": ["PHOTO", "VIDEO"] },
+        "caption": { "type": "string" },
+        "highlightTitle": { "type": "string" },
+        "audience": { "type": "string", "enum": ["ALL", "CLOSE_FRIENDS"] },
+        "allowedViewerIds": { "type": "array" },
+        "isArchived": { "type": "boolean" },
+        "expiresAtMs": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["authorId", "mediaUrl", "mediaType", "caption", "isArchived", "expiresAtMs", "createdAt"]
+    },
+    "StoryView": {
+      "title": "StoryView",
+      "description": "Story view and optional reaction under stories/{storyId}/views/{viewerId}.",
+      "type": "object",
+      "properties": {
+        "viewerId": { "type": "string" },
+        "reactionEmoji": { "type": "string" },
+        "viewedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["viewerId", "viewedAt"]
+    },
+    "NoteItem": {
+      "title": "NoteItem",
+      "description": "24-hour short status Note displayed in Inbox and Home.",
+      "type": "object",
+      "properties": {
+        "authorId": { "type": "string" },
+        "text": { "type": "string" },
+        "musicTitle": { "type": "string" },
+        "audience": { "type": "string", "enum": ["ALL", "CLOSE_FRIENDS"] },
+        "allowedViewerIds": { "type": "array" },
+        "expiresAtMs": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["authorId", "text", "musicTitle", "audience", "expiresAtMs", "createdAt", "updatedAt"]
+    },
+    "Conversation": {
+      "title": "Conversation",
+      "description": "1-to-1 or Group chat room metadata.",
+      "type": "object",
+      "properties": {
+        "participantIds": { "type": "array" },
+        "isGroup": { "type": "boolean" },
+        "groupName": { "type": "string" },
+        "groupAdminId": { "type": "string" },
+        "lastMessage": { "type": "string" },
+        "lastSenderId": { "type": "string" },
+        "lastMessageMediaType": { "type": "string" },
+        "typingUids": { "type": "array" },
+        "lastReadMs": { "type": "object" },
+        "lastMessageAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["participantIds", "lastMessage", "lastMessageMediaType", "typingUids", "lastMessageAt", "createdAt", "updatedAt"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "Direct or group message inside conversations/{convId}/messages/{messageId}.",
+      "type": "object",
+      "properties": {
+        "participantIds": { "type": "array" },
+        "senderId": { "type": "string" },
+        "recipientId": { "type": "string" },
+        "text": { "type": "string" },
+        "mediaUrl": { "type": "string" },
+        "mediaType": { "type": "string", "enum": ["TEXT", "PHOTO", "VIDEO", "AUDIO"] },
+        "reactions": { "type": "object" },
+        "isSeen": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["participantIds", "senderId", "recipientId", "text", "mediaType", "isSeen", "createdAt"]
+    },
+    "CallSession": {
+      "title": "CallSession",
+      "description": "Voice and Video call session signaling.",
+      "type": "object",
+      "properties": {
+        "callerId": { "type": "string" },
+        "calleeId": { "type": "string" },
+        "participantIds": { "type": "array" },
+        "callType": { "type": "string", "enum": ["VOICE", "VIDEO"] },
+        "status": { "type": "string", "enum": ["RINGING", "ACCEPTED", "DECLINED", "ENDED"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["callerId", "calleeId", "participantIds", "callType", "status", "createdAt", "updatedAt"]
+    },
+    "LiveStream": {
+      "title": "LiveStream",
+      "description": "Live broadcast room metadata.",
+      "type": "object",
+      "properties": {
+        "hostId": { "type": "string" },
+        "title": { "type": "string" },
+        "isLive": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["LIVE", "ENDED"] },
+        "viewerIds": { "type": "array" },
+        "viewerCount": { "type": "integer" },
+        "peakViewerCount": { "type": "integer" },
+        "startedAt": { "type": "string", "format": "date-time" },
+        "endedAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["hostId", "title", "isLive", "viewerIds", "viewerCount", "startedAt", "updatedAt"]
+    },
+    "LiveComment": {
+      "title": "LiveComment",
+      "description": "Live stream chat message.",
+      "type": "object",
+      "properties": {
+        "streamId": { "type": "string" },
+        "authorId": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["streamId", "authorId", "text", "createdAt"]
+    },
+    "VerificationRequest": {
+      "title": "VerificationRequest",
+      "description": "Golden Verification request reviewed exclusively by Super Admins.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "username": { "type": "string" },
+        "displayName": { "type": "string" },
+        "category": { "type": "string", "enum": ["CREATOR", "PUBLIC_FIGURE", "BRAND", "MEDIA"] },
+        "reason": { "type": "string" },
+        "portfolioLink": { "type": "string" },
+        "status": { "type": "string", "enum": ["PENDING", "APPROVED", "REJECTED"] },
+        "adminNote": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "username", "displayName", "category", "reason", "portfolioLink", "status", "createdAt", "updatedAt"]
+    },
+    "ModerationReport": {
+      "title": "ModerationReport",
+      "description": "User or post moderation report.",
+      "type": "object",
+      "properties": {
+        "reporterId": { "type": "string" },
+        "targetType": { "type": "string", "enum": ["POST", "USER"] },
+        "targetId": { "type": "string" },
+        "targetSummary": { "type": "string" },
+        "reason": { "type": "string" },
+        "status": { "type": "string", "enum": ["OPEN", "RESOLVED", "DISMISSED"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["reporterId", "targetType", "targetId", "targetSummary", "reason", "status", "createdAt", "updatedAt"]
+    },
+    "SupportTicket": {
+      "title": "SupportTicket",
+      "description": "Help & support submission.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "subject": { "type": "string" },
+        "message": { "type": "string" },
+        "status": { "type": "string", "enum": ["OPEN", "CLOSED"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "subject", "message", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": { "schema": "UserProfile", "description": "Public social profiles." },
+    "/users/{userId}/private/{docId}": { "schema": "UserPrivateInfo", "description": "PII and 2FA security records isolated to owner/admin." },
+    "/users/{userId}/login_activity/{activityId}": { "schema": "LoginActivity", "description": "User device sign-in history." },
+    "/users/{userId}/saved/{postId}": { "schema": "SavedPostRef", "description": "User's private saved posts." },
+    "/users/{userId}/liked/{postId}": { "schema": "SavedPostRef", "description": "User's liked posts index." },
+    "/users/{userId}/close_friends/{targetId}": { "schema": "CloseFriendRef", "description": "User's Close Friends list." },
+    "/users/{userId}/watch_history/{postId}": { "schema": "WatchHistoryItem", "description": "User's Reel and Video watch history." },
+    "/users/{userId}/blocks/{targetId}": { "schema": "UserBlock", "description": "User's blocked/restricted targets." },
+    "/users/{userId}/notifications/{notificationId}": { "schema": "NotificationItem", "description": "User notification inbox." },
+    "/usernames/{username}": { "schema": "UsernameReservation", "description": "Unique username reservation index." },
+    "/admins/{adminId}": { "schema": "AdminRecord", "description": "Trusted Super Admin registry." },
+    "/follows/{followId}": { "schema": "FollowRelation", "description": "Follow relationships and pending follow requests." },
+    "/posts/{postId}": { "schema": "PostItem", "description": "Posts, Reels, and Scheduled Posts." },
+    "/posts/{postId}/likes/{userId}": { "schema": "PostLike", "description": "Post like records." },
+    "/posts/{postId}/comments/{commentId}": { "schema": "PostComment", "description": "Post comments and replies." },
+    "/stories/{storyId}": { "schema": "StoryItem", "description": "24-hour stories and highlights." },
+    "/stories/{storyId}/views/{viewerId}": { "schema": "StoryView", "description": "Story view and reaction records." },
+    "/notes/{userId}": { "schema": "NoteItem", "description": "24-hour status notes." },
+    "/conversations/{convId}": { "schema": "Conversation", "description": "1-on-1 and Group chat metadata." },
+    "/conversations/{convId}/messages/{messageId}": { "schema": "ChatMessage", "description": "Direct and Group chat messages (text, photo, video, voice)." },
+    "/calls/{callId}": { "schema": "CallSession", "description": "Voice & Video call signaling." },
+    "/live_streams/{streamId}": { "schema": "LiveStream", "description": "Live broadcast rooms." },
+    "/live_streams/{streamId}/comments/{commentId}": { "schema": "LiveComment", "description": "Live stream comments." },
+    "/verification_requests/{requestId}": { "schema": "VerificationRequest", "description": "Golden Verification applications." },
+    "/reports/{reportId}": { "schema": "ModerationReport", "description": "Content and user moderation reports." },
+    "/support_tickets/{ticketId}": { "schema": "SupportTicket", "description": "Customer support inquiries." }
+  }
+}
